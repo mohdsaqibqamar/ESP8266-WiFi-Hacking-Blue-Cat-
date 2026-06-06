@@ -21,6 +21,10 @@ Disconnect users from a targeted Wi-Fi network by sending forged deauthenticatio
 Clones the target's Wi-Fi name (SSID) and creates an open access point with the exact same name. When victims connect, they are presented with a Captive Portal (Phishing Page) asking for their Wi-Fi password to "install a firmware update."
 * **Usage:** Select a target and click **START EVILTWIN**.
 
+### 3.5. Evil Twin + Deauth (Combined Attack)
+The ultimate combo. It simultaneously kicks users off their legitimate network using Deauth packets, while instantly broadcasting the Evil Twin phishing network to capture their password when they attempt to reconnect.
+* **Usage:** Select a target and click **EVIL TWIN + DEAUTH**.
+
 ### 4. Custom Phishing Templates
 The captive portal page is fully customizable. You don't have to stick with the default router firmware update page.
 * **Download Default:** Download the default HTML template to your PC to modify it.
