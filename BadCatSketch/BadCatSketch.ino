@@ -481,7 +481,7 @@ void handleArgs() {
   if (webServer.hasArg("deauth")) {
     if (webServer.arg("deauth") == "start") {
       deauthing_active = true;
-      sendNeonMessage("Starting Deauth...", "Firing packets in background...", 4);
+      sendNeonMessage("STARTING DEAUTH", "Meow! Disconnecting victims...", 4);
       return;
     } else if (webServer.arg("deauth") == "stop") {
       deauthing_active = false;
@@ -500,7 +500,7 @@ void handleArgs() {
     if (webServer.arg("hotspot") == "start") {
       hotspot_active = true;
       dnsServer.stop();
-      sendNeonMessage("Starting EvilTwin...", "Switching SSID and Channel...", 4);
+      sendNeonMessage("STARTING EVILTWIN", "Hiss! Cloning the network...", 4);
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
@@ -516,7 +516,7 @@ void handleArgs() {
     } else if (webServer.arg("hotspot") == "stop") {
       hotspot_active = false;
       dnsServer.stop();
-      sendNeonMessage("Stopping EvilTwin...", "Reverting to original AP...", 4);
+      sendNeonMessage("STOPPING EVILTWIN", "Purr... Network reverted.", 4);
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
@@ -558,7 +558,7 @@ void handleArgs() {
         repeater_active = true;
         
         // Send the HTTP response BEFORE we change the Wi-Fi network, so the browser doesn't get a connection error
-        sendNeonMessage("Connected Successfully!", "<span style='color:var(--green);'>Repeater is now active.</span><br>Please connect your phone to the new Extender Wi-Fi: <b>" + e_ssid + "</b>");
+        sendNeonMessage("CONNECTED SUCCESSFULLY!", "<span style='color:var(--green);'>Meow! Repeater is active.</span><br>Connect to the new Extender Wi-Fi: <b>" + e_ssid + "</b>");
         
         unsigned long wait_start = millis();
         while (millis() - wait_start < 1000) { webServer.client().flush(); delay(1); }
@@ -612,7 +612,7 @@ void handleArgs() {
       repeater_error = "";
       ip_napt_enable_no(SOFTAP_IF, 0);
       
-      sendNeonMessage("Stopping Repeater...", "Reverting to Hacking Mode...", 4);
+      sendNeonMessage("STOPPING REPEATER", "Hiss! Reverting to Hacking Mode...", 4);
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
