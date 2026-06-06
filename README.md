@@ -82,10 +82,10 @@ This step is super important so the Wi-Fi Repeater works fast!
 ## 💻 Accessing the Control Panel
 
 Once the upload is done:
-1. Connect your phone or PC to the Wi-Fi network named **Syper** (Password: `Syper@786`).
+1. Connect your phone or PC to the Wi-Fi network named **BlueCat** (Password: `Cat@1234`).
 2. Open Google Chrome.
 3. Type `http://192.168.4.1/admin` in the search bar at the top and press Enter.
-4. Log in using the password: `Syper@786`.
+4. Log in using the password: `Cat@1234`.
 5. Welcome to the **Blue Wifi Cat** control panel!
 
 ---
