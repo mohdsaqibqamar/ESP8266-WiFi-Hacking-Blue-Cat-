@@ -1,4 +1,4 @@
-# Bad Wifi Cat ESP8266 & Deauther
+# BadCat ESP8266 & Deauther
 
 An advanced, feature-rich Wi-Fi auditing and penetration testing tool designed specifically for the ESP8266 microcontroller. This project provides an all-in-one control panel for network analysis, deauthentication attacks, evil twin phishing, and even acts as a Wi-Fi repeater. It features a sleek "Neon" dark-themed UI.
 
@@ -47,7 +47,7 @@ Flood the area with dozens of fake Wi-Fi networks (SSIDs) to confuse users or hi
 
 ## Step-by-Step Installation Guide (Super Easy!)
 
-Don't worry if you are completely new to this! Just follow these easy steps like a recipe, and you'll have your **Bad Wifi Cat** running in no time.
+Don't worry if you are completely new to this! Just follow these easy steps like a recipe, and you'll have your **BadCat** running in no time.
 
 ### Step 1: Get the Software (Arduino IDE)
 1. Go to [arduino.cc/en/software](https://www.arduino.cc/en/software) on your computer.
@@ -90,7 +90,7 @@ Once the upload is done:
 2. Open Google Chrome.
 3. Type `http://192.168.4.1/admin` in the search bar at the top and press Enter.
 4. Log in using the password: `Cat@1234`.
-5. Welcome to the **Bad Wifi Cat** control panel!
+5. Welcome to the **BadCat** control panel!
 
 ---
 
