@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Wifi Cat | ESP8266 Tool</title>
+    <meta name="description" content="A powerful and simple Wi-Fi auditing tool for ESP8266.">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Clean, readable font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🐱 Blue Wifi Cat</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#install">Install Guide</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Advanced Wi-Fi Auditing in Your Pocket.</h1>
+            <p>Blue Wifi Cat transforms a cheap ESP8266 microchip into a powerful control panel for network scanning, Deauth attacks, Evil Twin phishing, and a NAPT repeater.</p>
+            <div class="btn-group">
+                <a href="#install" class="btn btn-primary">How to Install</a>
+                <a href="#features" class="btn btn-outline">See Features</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Everything You Need</h2>
+            <div class="grid">
+                
+                <div class="card">
+                    <div class="card-icon">📡</div>
+                    <h3>Target Scanning</h3>
+                    <p>Easily scan your surroundings to find vulnerable networks, displaying their SSID, Mac Address, and Wi-Fi Channel.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Deauth Attacks</h3>
+                    <p>Forcefully disconnect clients from their network. Perfect for capturing handshakes or forcing users into your phishing trap.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🎣</div>
+                    <h3>Evil Twin Phishing</h3>
+                    <p>Clone a network and host a fake login page. When a user connects, they are asked for their Wi-Fi password.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🎨</div>
+                    <h3>Custom Templates</h3>
+                    <p>Don't like the default page? Upload your own custom HTML template directly from your phone or PC. Automatically wipes on reboot.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🔑</div>
+                    <h3>Password Vault</h3>
+                    <p>Captured passwords are automatically saved to persistent memory. View them anytime and securely delete them when done.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🌐</div>
+                    <h3>Wi-Fi Repeater</h3>
+                    <p>Connect to a router and act as a bridge. Provide real internet to your victims while monitoring the connection.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="install" class="section">
+        <div class="container">
+            <h2 class="section-title">Installation Guide</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: #8b949e;">Follow these simple steps to install the firmware via Arduino IDE.</p>
+            
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div>
+                    <h3>Get the Software</h3>
+                    <p>Download and install the official <a href="https://www.arduino.cc/en/software" target="_blank">Arduino IDE</a> on your computer.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div>
+                    <h3>Add the Spacehuhn Core</h3>
+                    <p>In Arduino, go to <b>File > Preferences</b>. Find the <i>Additional Boards Manager URLs</i> box and paste this link:</p>
+                    <code>https://raw.githubusercontent.com/SpacehuhnTech/arduino/main/package_spacehuhn_index.json</code>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div>
+                    <h3>Install the Board</h3>
+                    <p>Go to <b>Tools > Board > Boards Manager</b>. Search for <b>"deauther"</b> and install the package named <i>ESP8266 Deauther</i>.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div>
+                    <h3>Select Board & LwIP</h3>
+                    <p>Go to <b>Tools > Board</b> and select <b>Generic ESP8266 Module</b>. Then go to <b>Tools > LwIP Variant</b> and select <b style="color: #58a6ff;">v2 Higher Bandwidth</b> (Crucial for the repeater to work fast).</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div>
+                    <h3>Upload the Code</h3>
+                    <p>Plug in your ESP8266 via USB. Select its Port in <b>Tools > Port</b>. Finally, click the <b>Upload</b> button (the right arrow) and wait for it to finish!</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="troubleshooting" class="section bg-light" style="padding-top: 40px; padding-bottom: 60px;">
+        <div class="container">
+            <h2 class="section-title" style="font-size: 2.2rem; margin-bottom: 30px; color: #fff; text-shadow: var(--glow-secondary);">🛠️ Fix "Choose File" Issue</h2>
+            <p style="text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 1.1rem;">If the <b>Choose File</b> button is not working on your phone while uploading a Custom Template, use this method:</p>
+            
+            <div class="card" style="max-width: 700px; margin: 0 auto; border-color: var(--secondary); box-shadow: inset 0 0 15px rgba(255,0,119,0.1), var(--glow-secondary);">
+                <ol style="padding-left: 20px; line-height: 1.8; font-size: 1.05rem;">
+                    <li style="margin-bottom: 12px;">Connect to the Wi-Fi network from your phone.</li>
+                    <li style="margin-bottom: 12px;">When the auto-popup window <i>(Sign in to Wi-Fi)</i> appears, <b>Close</b> it, or click the top-right 3-dots menu and select <b style="color: var(--secondary);">"Use this network as is"</b> / <b style="color: var(--secondary);">"Keep Wi-Fi Connection"</b>.</li>
+                    <li style="margin-bottom: 12px;">Now, open your <b>Google Chrome</b> (or Safari) browser normally.</li>
+                    <li>Type <code style="display:inline; padding:4px 8px; color: var(--primary);">192.168.4.1/admin</code> in the address bar and press enter.</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p><strong>Disclaimer:</strong> This tool is for educational purposes and authorized auditing only. Usage against networks you do not own is illegal.</p>
+            <p style="margin-top: 10px; color: #8b949e;">&copy; 2026 Blue Wifi Cat ESP8266 Project.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
