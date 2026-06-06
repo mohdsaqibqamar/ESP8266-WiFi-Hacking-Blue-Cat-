@@ -4,6 +4,8 @@ An advanced, feature-rich Wi-Fi auditing and penetration testing tool designed s
 
 LiveWeb:- https://raw.githack.com/mohdsaqibqamar/ESP8266-WiFi-Hacking-Blue-Cat-/refs/heads/main/Website/index.html
 
+Default WiFi name `BlueCat` password `Cat@1234`
+
 ---
 
 ## âš¡ Features & Usage
@@ -80,11 +82,16 @@ This step is super important so the Wi-Fi Repeater works fast!
 ## ðŸ’» Accessing the Control Panel
 
 Once the upload is done:
-1. Connect your phone or PC to the Wi-Fi network named **Syper** (Password: `Syper@786`).
+1. Connect your phone or PC to the Wi-Fi network named **BlueCat** (Password: `Cat@1234`).
 2. Open Google Chrome.
 3. Type `http://192.168.4.1/admin` in the search bar at the top and press Enter.
+<<<<<<< HEAD
 4. Log in using the password: `Syper@786`.
 5. Welcome to the **Bad Wifi Cat** control panel!
+=======
+4. Log in using the password: `Cat@1234`.
+5. Welcome to the **Blue Wifi Cat** control panel!
+>>>>>>> cd1a73d2be93b286b33d3d383089753dd28f7898
 
 ---
 
@@ -99,4 +106,9 @@ If the **Choose File** button is not working on your phone while uploading a Cus
 
 ---
 
-*Disclaimer: This tool is intended for educational purposes and authorized auditing only. Usage of this tool against networks you do not own or do not have explicit permission to audit is illegal. The author assumes no liability for misuse.*
+Disclaimer
+This project is a proof of concept for testing and educational purposes. Bugs can occur!
+
+Use it only against your own networks and devices!
+Please check the legal regulations in your country before using it.
+We don't take any responsibility for what you do with this program.
